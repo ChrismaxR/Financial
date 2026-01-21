@@ -34,6 +34,8 @@ fin <- fin_data |>
       vakantiebijslagbonus,
     bruto_vast_inkomen = salaris - bruto_variabel_inkomen,
     variabel_inkomen_perc = bruto_variabel_inkomen / salaris,
+    urenbonus_inkomen_perc = urenbonus / salaris,
+    tariefbonus_inkomen_perc = tariefbonus / salaris,
     pensioen_perc = (pensioen + inhouding_pensioen) / netto_salaris
   ) |>
   select(jaar, maand, ym, datum, everything())
@@ -208,6 +210,9 @@ fin_long <- fin_wide |>
       name == 'betaald_ouderschapsverlof' ~ "Ouderschapsverlof (betaald)",
       name == 'onbetaald_ouderschapsverlof' ~ "Ouderschapsverlof (onbetaald)",
       name == 'dokter_tandarts' ~ "Dokter/Tandarts",
+      name == 'urenbonus_inkomen_perc' ~ "Urenbonus",
+      name == 'tariefbonus_inkomen_perc' ~ "Tariefbonus",
+      name == 'variabel_inkomen_perc' ~ "Bonus totaal",
       T ~ "No filter"
     )
   )

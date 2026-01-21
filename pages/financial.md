@@ -66,7 +66,7 @@ title:
         title='% Variabel inkomen per maand'
         x=datum
         y=value
-        series=name
+        series=name_filter
         yFmt=pct0
         markers=true
         markerShape=emptyCircle>
@@ -216,7 +216,9 @@ PIVOT (
 ```sql variable_inkomen_perc
 select * from financial_data.fin_long
 where name in (
-   'variabel_inkomen_perc'
+   'variabel_inkomen_perc', 
+   'urenbonus_inkomen_perc', 
+   'tariefbonus_inkomen_perc'
 )
 and jaar in ${inputs.geselecteerd_jaar.value}
 

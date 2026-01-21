@@ -65,7 +65,7 @@ dbWriteTable(
 # • Manuele controle met dbReadTable om te verifiëren of data correct geladen is
 
 dbReadTable(conn = con, "fin_long")
-test <- dbReadTable(conn = con, "fin_wide")
+dbReadTable(conn = con, "fin_wide")
 dbReadTable(conn = con, "source_data_meta")
 dbReadTable(conn = con, "wrangle_data_meta")
 

@@ -67,6 +67,8 @@ dbExecute(
     bruto_normaal_variabel_inkomen DOUBLE,
     bruto_vast_inkomen DOUBLE,
     variabel_inkomen_perc DOUBLE,
+    urenbonus_inkomen_perc DOUBLE,
+    tariefbonus_inkomen_perc DOUBLE,
     pensioen_perc DOUBLE,
     facturabel DOUBLE,
     niet_facturabel DOUBLE,
@@ -110,4 +112,4 @@ dbExecute(
 )
 
 # Remove tables
-duckdb::dbRemoveTable(con, "wrangle_data_meta")
+# duckdb::dbRemoveTable(con, "fin_wide")
