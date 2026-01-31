@@ -57,7 +57,7 @@ select gewerkte_datum,
   
  from financial_data.fin_long
 where 1=1 
-and name_filter != 'No filter'
+and name_filter not in ('Bonus totaal', 'Tariefbonus', 'Urenbonus', 'No filter')
 and value > 0
 and extract(year from gewerkte_datum) in ${inputs.geselecteerd_jaar.value}
 
