@@ -8,7 +8,7 @@ title:
     value=value
     sparkline=datum
     sparklineType=area
-    title="Netto salaris deze maand"
+    title={`Netto salaris ${update_month?.[0]?.month ?? ''}`}
     fmt=eur
     comparison=verschil
     comparisonFmt=eur
@@ -20,7 +20,7 @@ title:
     value=uurloon
     sparkline=datum
     sparklineType=area
-    title="Uurloon deze maand"
+    title={`Uurloon ${update_month?.[0]?.month ?? ''}`}
     fmt=eur2
     comparison=uurloon_verschil
     comparisonFmt=eur2
@@ -32,7 +32,7 @@ title:
     value=value
     sparkline=datum
     sparklineType=area
-    title="Billable % deze maand"
+    title={`Billable % ${update_month?.[0]?.month ?? ''}`}
     fmt=pct1
     comparison=verschil
     comparisonFmt=pct1
@@ -44,7 +44,7 @@ title:
     value=value
     sparkline=datum
     sparklineType=area
-    title="Bonus deze maand"
+    title={`Bonus % ${update_month?.[0]?.month ?? ''}`}
     fmt=eur
     comparison=verschil
     comparisonFmt=eur
@@ -54,7 +54,7 @@ title:
   <BigValue 
     data={vakantieuren} 
     value=label
-    title="Vakantieverlof dit jaar"  
+    title={`Vakantieverlof ${update_month?.[0]?.year ?? ''}`}
     comparison=vakantie_uren_over
     comparisonTitle="vakantieverlofuren over"
   />
@@ -64,7 +64,7 @@ title:
     value=value
     sparkline=datum
     sparklineType=area
-    title="Variabel inkomen deze maand"
+    title={`Variabel inkomen ${update_month?.[0]?.month ?? ''}`}
     fmt=pct1
     comparison=verschil
     comparisonFmt=pct1
@@ -191,4 +191,11 @@ from vak
 ```sql update_time
 select max(update_date_time) as update 
   from financial_data.source_data_meta
+```
+
+```sql update_month
+select 
+  strftime(max(datum), '%b %Y') as month, 
+  strftime(max(datum), '%Y') as year
+  from financial_data.fin_wide
 ```

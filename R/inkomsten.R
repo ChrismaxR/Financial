@@ -217,6 +217,44 @@ fin_long <- fin_wide |>
     )
   )
 
+# Entrador Bottom line -----------------
+# aparte tabel maken om mijn bijdrage aan de bottom line van Entrador
+# inzichtelijk maken, namelijk gefactureerde bedrag aan tussenpersoon en
+# dat in het laatje van Entrador komt.
+
+bottom_line <- billed_hours_cleaned |>
+  filter(status == "Gefactureerd") |>
+  transmute(
+    gewerkte_datum,
+    gewerkte_ym,
+    gewerkte_y = str_sub(gewerkte_ym, 1, 4),
+    tussen_persoon = klant,
+    eind_klant = str_remove(project, "Inzet "),
+    uren,
+    uurtarief = case_when(
+      eind_klant == "KLM" ~ 85,
+      eind_klant == "RVIG" ~ 95,
+      eind_klant == "RVIG verl" ~ 100,
+      eind_klant == "DT&V" ~ 100,
+    ),
+    factuurbedrag = uren * uurtarief
+  )
+
+bottom_line |>
+  group_by(
+    gewerkte_y,
+    tussen_persoon,
+    eind_klant
+  ) |>
+  summarise(
+    min_datum = min(gewerkte_ym),
+    max_datum = max(gewerkte_ym),
+    uurttarief = max(uurtarief),
+    facturabele_uren = sum(uren),
+    bottom_line = sum(factuurbedrag)
+  ) |>
+  arrange(max_datum)
+
 # Ouput -------------------------------------------------------------------
 
 # Oud - heb eerst csv files gebruikt, maar nu overgestapt naar duckdb om beter

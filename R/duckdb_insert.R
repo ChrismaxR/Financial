@@ -46,6 +46,7 @@ wrangle_data_meta <- tibble::tibble(
 
 dbWriteTable(con, "fin_long", fin_long, append = F, overwrite = T)
 dbWriteTable(con, "fin_wide", fin_wide, append = F, overwrite = T)
+dbWriteTable(con, "bottom_line", bottom_line, append = F, overwrite = T)
 dbWriteTable(
   con,
   "source_data_meta",
@@ -66,6 +67,7 @@ dbWriteTable(
 
 dbReadTable(conn = con, "fin_long")
 dbReadTable(conn = con, "fin_wide")
+dbReadTable(conn = con, "bottom_line")
 dbReadTable(conn = con, "source_data_meta")
 dbReadTable(conn = con, "wrangle_data_meta")
 

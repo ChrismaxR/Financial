@@ -87,6 +87,21 @@ dbExecute(
   )"
 )
 
+#bottom_line
+dbExecute(
+  con,
+  "CREATE TABLE bottom_line (
+    gewerkte_datum DATE,
+    gewerkte_ym TEXT,
+    gewerkte_y TEXT,
+    tussen_persoon TEXT,
+    eind_klant TEXT,
+    uren DOUBLE,
+    uurtarief DOUBLE,
+    factuurbedrag DOUBLE 
+  )"
+)
+
 # source_data_meta
 dbExecute(
   con,

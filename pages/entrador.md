@@ -1,5 +1,5 @@
 ---
-title: Totalen
+title: Entrador
 ---
 
 <Dropdown
@@ -10,7 +10,14 @@ title: Totalen
     selectAllByDefault=true
 />
 
-<Grid cols=4>
+<Grid cols=3>
+  <BigValue 
+    data={bottom_line_totaal} 
+    value=factuurbedrag
+    title="Totaal gefactureerd"
+    fmt=eur
+  />
+
   <BigValue 
     data={total_bruto} 
     value=bruto_bedrag
@@ -25,11 +32,6 @@ title: Totalen
     fmt=eur
   />
 
-  <BigValue 
-    data={total_netto} 
-    value=billed_hours
-    title="Totaal Billable uren"
-  />
 
   <BigValue 
     data={total_netto} 
@@ -37,14 +39,19 @@ title: Totalen
     title="Netto per billed uur"
     fmt=eur
   />
-
-  <BigValue 
-    data={pensioen_gespaard} 
-    value=pensioen_bijdrage
-    title="Totaal Pensioen gespaard"
-    fmt=eur
-  />
+  
 </Grid>
+
+<BarChart
+    data={bottom_line}
+    title='Gefactureerde bedragen'
+    x=eind_klant
+    y=bottom_line
+    type=stacked
+    swapXY=true
+    series=eind_klant
+    yFmt=eur
+/>
 
 
 ```sql jaar_selector
@@ -86,4 +93,28 @@ select sum(value) as pensioen_bijdrage
 where 1=1
   and name in ('pensioen', 'inhouding_pensioen')
   and jaar in ${inputs.geselecteerd_jaar.value}
+```
+
+```sql bottom_line
+select  
+  gewerkte_y, 
+  tussen_persoon, 
+  eind_klant,
+  min(gewerkte_ym) as min_datum,
+  max(gewerkte_ym) as max_datum,
+  max(uurtarief) as uurtarief,
+  sum(uren) as facturabele_uren,
+  sum(factuurbedrag) as bottom_line
+ from financial_data.bottom_line
+group by
+ gewerkte_y, 
+ tussen_persoon, 
+ eind_klant
+```
+
+```sql bottom_line_totaal
+select sum(factuurbedrag) as factuurbedrag
+  from financial_data.bottom_line
+where 1=1
+  and gewerkte_y in ${inputs.geselecteerd_jaar.value}
 ```
