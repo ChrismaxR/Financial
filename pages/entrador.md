@@ -33,22 +33,16 @@ title: Entrador
   />
 
 
-  <BigValue 
-    data={total_netto} 
-    value=netto_per_billed_hour
-    title="Netto per billed uur"
-    fmt=eur
-  />
+
   
 </Grid>
 
 <BarChart
     data={bottom_line}
     title='Gefactureerde bedragen'
-    x=eind_klant
+    x=gewerkte_y
     y=bottom_line
     type=stacked
-    swapXY=true
     series=eind_klant
     yFmt=eur
 />

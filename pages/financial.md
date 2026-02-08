@@ -10,25 +10,32 @@ title:
     selectAllByDefault=true
 />
 
-<Grid cols=3>
+<Grid cols=4>
   <BigValue 
     data={total_bruto} 
     value=bruto_bedrag
-    title="Totaal Bruto verdiend"
+    title="Totaal Bruto"
     fmt=eur
   />
 
   <BigValue 
     data={total_netto} 
     value=netto_bedrag
-    title="Totaal Netto verdiend"
+    title="Totaal Netto"
     fmt=eur
   />
 
   <BigValue 
     data={pensioen_gespaard} 
     value=pensioen_bijdrage
-    title="Totaal Pensioen gespaard"
+    title="Totaal Pensioen"
+    fmt=eur
+  />
+
+    <BigValue 
+    data={total_netto} 
+    value=netto_per_billed_hour
+    title="Netto per billed uur"
     fmt=eur
   />
 </Grid>
