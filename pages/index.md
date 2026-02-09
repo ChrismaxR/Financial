@@ -79,6 +79,7 @@ title:
     y=netto_salaris
     yFmt=eur
     markers=true
+    labels=true
     markerShape=emptyCircle>
     <ReferenceLine 
         data={avg_netto} 
@@ -94,14 +95,25 @@ Laatste update: <Value data={update_time} column=update row=0 fmt='longdate'/>
 
 
 
+```sql fin_long_365
+select *
+from financial_data.fin_long
+where datum > current_date - 365
+```
+
+```sql fin_wide_365
+select *
+from financial_data.fin_wide
+where datum > current_date - 365
+```
+
 ```sql fin_agg_netto
 select datum, 
   		name, 
   		value,
       value - LAG(value) OVER (ORDER BY datum) as verschil
-  from financial_data.fin_long
+  from ${fin_long_365}
 where name = 'netto_salaris'
-and datum > current_date - 365
 order by datum desc
 ```
 
@@ -109,10 +121,8 @@ order by datum desc
  select datum,
   	    value,
         value - LAG(value) OVER (ORDER BY datum) as verschil
-    from financial_data.fin_long
-   where 1 = 1
-     and name = 'facturabel_perc_gewerkte_ym'
-     and datum > current_date - 365
+    from ${fin_long_365}
+   where name = 'facturabel_perc_gewerkte_ym'
 order by datum desc
 ```
 
@@ -120,10 +130,8 @@ order by datum desc
  select datum,
   	    value,
         value - LAG(value) OVER (ORDER BY datum) as verschil
-    from financial_data.fin_long
-   where 1 = 1
-     and name = 'variabel_inkomen_perc'
-     and datum > current_date - 365
+    from ${fin_long_365}
+   where name = 'variabel_inkomen_perc'
 order by datum desc
 ```
 
@@ -132,9 +140,8 @@ select datum,
   		name, 
   		value,
       value - LAG(value) OVER (ORDER BY datum) as verschil
-  from financial_data.fin_long
+  from ${fin_long_365}
 where name = 'bruto_variabel_inkomen'
-and datum > current_date - 365
 order by datum desc
 ```
 
@@ -150,8 +157,7 @@ with dt as (
         variabel_inkomen_perc, 
         netto_salaris, 
         netto_salaris/facturabel as uurloon
-  from financial_data.fin_wide
-  where datum > current_date - 365
+  from ${fin_wide_365}
   order by datum desc
 )
 
@@ -163,9 +169,7 @@ order by datum desc
 
 ```sql avg_netto
 select avg(netto_salaris) as avg
-from (
-  select * from ${datatable}
-)
+from ${datatable}
 
 ```
 

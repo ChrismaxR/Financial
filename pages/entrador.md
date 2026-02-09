@@ -19,22 +19,20 @@ title: Entrador
   />
 
   <BigValue 
+    data={bottom_line_totaal} 
+    value=max_uurtarief
+    title="Maximale uurtarief"
+    fmt=eur
+  />
+
+  <BigValue 
     data={total_bruto} 
     value=bruto_bedrag
     title="Totaal Bruto verdiend"
     fmt=eur
   />
 
-  <BigValue 
-    data={total_netto} 
-    value=netto_bedrag
-    title="Totaal Netto verdiend"
-    fmt=eur
-  />
 
-
-
-  
 </Grid>
 
 <BarChart
@@ -44,50 +42,55 @@ title: Entrador
     y=bottom_line
     type=stacked
     series=eind_klant
-    yFmt=eur
+    yFmt=eur1
+    sort =False
+    stackTotalLabel=false
+    labels=true
+        colorPalette={[
+        '#009fd9',
+        '#01689b',
+        '#0D1A63',
+        '#76D2B6',
+        ]}
 />
 
 
 ```sql jaar_selector
-select 
+select distinct
     jaar
 from financial_data.fin_wide
+order by jaar desc
+```
 
-group by 1
+```sql fin_long_year
+select *
+from financial_data.fin_long
+where jaar in ${inputs.geselecteerd_jaar.value}
+```
+
+```sql fin_wide_year
+select *
+from financial_data.fin_wide
+where jaar in ${inputs.geselecteerd_jaar.value}
 ```
 
 
 ```sql total_bruto
 select sum(value) as bruto_bedrag 
- from (
-  select * 
-    from financial_data.fin_long
-   where 1 = 1
-     and name in (
-        'salaris', 'urenbonus', 'tariefbonus', 'vakantiebijslagbonus', 'vakantiebijslag',
-        'onkosten', 'mobiliteitsvergoeding',  'plaatsingsbonus', 'aanbrengbonus'
-        )
-     and jaar in ${inputs.geselecteerd_jaar.value}
- )
+from ${fin_long_year}
+where name in (
+    'salaris', 'urenbonus', 'tariefbonus', 'vakantiebijslagbonus', 'vakantiebijslag',
+    'onkosten', 'mobiliteitsvergoeding',  'plaatsingsbonus', 'aanbrengbonus'
+)
 ```
 
 ```sql total_netto
 select sum(netto_salaris) as netto_bedrag, 
        sum(facturabel) as billed_hours, 
        sum(netto_salaris)/sum(facturabel) as netto_per_billed_hour
-from financial_data.fin_wide
-
-where 1=1
-  and jaar in ${inputs.geselecteerd_jaar.value}
+from ${fin_wide_year}
 ```
 
-```sql pensioen_gespaard
-select sum(value) as pensioen_bijdrage
-  from financial_data.fin_long
-where 1=1
-  and name in ('pensioen', 'inhouding_pensioen')
-  and jaar in ${inputs.geselecteerd_jaar.value}
-```
 
 ```sql bottom_line
 select  
@@ -107,8 +110,10 @@ group by
 ```
 
 ```sql bottom_line_totaal
-select sum(factuurbedrag) as factuurbedrag
+select 
+  sum(factuurbedrag) as factuurbedrag,
+  max(uurtarief) as max_uurtarief
+  
   from financial_data.bottom_line
-where 1=1
-  and gewerkte_y in ${inputs.geselecteerd_jaar.value}
+where gewerkte_y in ${inputs.geselecteerd_jaar.value}
 ```
