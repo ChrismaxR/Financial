@@ -102,7 +102,7 @@ title:
         title='Afdrachten'
         x=datum
         y=value
-        series=name
+        series=name_new
         yFmt=eur
         labels=true
         colorPalette={[
@@ -137,10 +137,24 @@ where jaar in ${inputs.geselecteerd_jaar.value}
 
 
 ```sql fin_data_long_out
-select * from ${fin_long_year}
-where name in (
+select  datum, 
+        case 
+            when name = 'inhouding_pensioen' then 'pensioen' 
+            else name 
+        end as name_new, 
+        sum(value) as value
+  from ${fin_long_year}
+ where name in (
    'leaseauto', 'pensioen', 'inhoudingen', 'loonheffing', 'inhouding_pensioen'
 )
+
+group by
+        datum, 
+        case 
+            when name = 'inhouding_pensioen' then 'pensioen' 
+            else name 
+        end
+
 ```
 
 ```sql fin_data_bonus
