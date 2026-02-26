@@ -251,7 +251,8 @@ bottom_line |>
     max_datum = max(gewerkte_ym),
     uurttarief = max(uurtarief),
     facturabele_uren = sum(uren),
-    bottom_line = sum(factuurbedrag)
+    bottom_line = sum(factuurbedrag),
+    aantal_maanden = n_distinct(gewerkte_ym)
   ) |>
   arrange(max_datum)
 

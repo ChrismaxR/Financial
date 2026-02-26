@@ -10,6 +10,10 @@
 - Loonstrookjes (financial.csv in Hours dir) - manuele invoer o.b.v. pdfs uit NMBRS app
 - Hours (TimeChimp export naar csv) - manuele actie voor export. 
 
+Mogelijk:
+- loonstrookjes voormalige werkgevers
+- pensoeindata (bv. UPO) -> wel meer 
+
 Deze bronnen worden opgeschoond en gejoined tot One Big Table (OBT) in Inkomsten.R in Hours/code directory
 
 # Dashboard Data:
