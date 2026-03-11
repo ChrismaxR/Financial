@@ -44,7 +44,7 @@ title:
     value=value
     sparkline=datum
     sparklineType=area
-    title={`Bonus % ${update_month?.[0]?.month ?? ''}`}
+    title={`Bonus ${update_month?.[0]?.month ?? ''}`}
     fmt=eur
     comparison=verschil
     comparisonFmt=eur
