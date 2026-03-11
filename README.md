@@ -12,16 +12,15 @@
 
 Mogelijk:
 - loonstrookjes voormalige werkgevers
-- pensoeindata (bv. UPO) -> wel meer 
-
-Deze bronnen worden opgeschoond en gejoined tot One Big Table (OBT) in Inkomsten.R in Hours/code directory
+- pensoeindata (bv. UPO) -> meer voorspellende focus.
 
 # Dashboard Data:
 
 Het evidence.dev dashboard gebruikt de OBT op verschillende manieren:
 
-- fin_data_wide -> is de een-op-een kopie van de OBT
+- fin_data_wide -> idee is een One-Big-Table (OBT) waaruit alle benodigde data voor Dashboard gehaald kan worden.
 - fin_data_long -> OBT, maar dan long op jaar, maand, datum, kolomnaam uit OBT en bijbehorende waarde (nodig voor gestapelde bar graphs)
+- bottom_line -> aggregatie van financiële cijfers voor de bottomline voor E.
 
 # Dashboard Design:
 
@@ -41,9 +40,14 @@ Design moet direct gekoppeld zijn aan mijn doelen van het dashboard:
 3. ~~Datatype management: bv. jaar en ym kolommen ziet evidence.dev als numbers, terwijl ik ze strings wil laten zijn. Hoe pas ik dit aan?~~
 4. Customization: evidence logo eruit slopen
 5. Aanpassing index.md: 
-	- Alert Status met meta gegevens onderaan de pagina
-	- Meta gegevens uitbreiden met laatste update datum van de data
-6. Betere opties om te filteren ipv een dropdown. Ik kan kiezen uit checkbox en date range.
+	~~- Alert Status met meta gegevens onderaan de pagina~~
+	~~- Meta gegevens uitbreiden met laatste update datum van de data~~
+6. ~~Betere opties om te filteren ipv een dropdown. Ik kan kiezen uit checkbox en date range.~~
+7. Uitbreiden set met data van voorgaande werkgever. 
+	- mapping oude loonstrookdata naar huidige set.
+	- checken op juistheid
+	- inladen in db
+8. 
 
 # Evidence Template Project
 

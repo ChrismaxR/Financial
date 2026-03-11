@@ -7,6 +7,20 @@ source(here::here("R", "proj_variables.R")) # aparte file om persoonlijke data n
 # Manuele invoer van loonstrook cijfers uit Nmbrs ESS app.
 fin_data <- read_csv(fin_data_csv)
 
+# Vorige invoer loonstroken vorige werkgever
+legacy_fin_data <- read_delim(
+  here::here("sources", "raw_data", "statement_overview.csv"),
+  delim = ";",
+  trim_ws = TRUE,
+  na = "-",
+  locale = locale(
+    decimal_mark = ",",
+    grouping_mark = "."
+  )
+) |>
+  janitor::clean_names()
+
+
 # Export van uren opgegeven in TimeChimp
 hours <- map_df(
   .x = fs::dir_ls(hours_data_csv, regex = "time_export"),
@@ -39,6 +53,43 @@ fin <- fin_data |>
     pensioen_perc = (pensioen + inhouding_pensioen) / netto_salaris
   ) |>
   select(jaar, maand, ym, datum, everything())
+
+# Zelfde voor legacy financiele data van vorige werkgever.
+# Hiervoor moet ik mapping maken van oude structuur van de loonstrookdata naar de huidige
+# structuur (fin_data). Deze logica volgt hieronder:
+
+legacy_fin <- legacy_fin_data |>
+  transmute(
+    jaar = str_sub(as.character(tijdvak), 1, 4),
+    maand = str_sub(as.character(tijdvak), 5, 6),
+    ym = str_c(jaar, maand),
+    datum = ymd(str_c(jaar, maand, "01", sep = "-")),
+    gewerkte_ym = str_c(
+      year(datum - 1),
+      str_pad(month(datum - 1), width = 2, side = "left", pad = "0")
+    ),
+    gewerkte_datum = floor_date(datum - 1, unit = "month"),
+    stamsalaris = NA_real_,
+    salaris = tot_betaling,
+    loonheffing = loonhef,
+    ouderschapsverlof = NA_real_,
+    urenbonus = NA_real_,
+    tariefbonus = bonus_tb,
+    vakantiebijslag = vak_geld,
+    vakantiebijslagbonus = NA_real_,
+    leaseauto = NA_real_,
+    pensioen = pensioenpremie,
+    netto_salaris = nett,
+    onkosten = NA_real_,
+    mobiliteitsvergoeding = NA_real_,
+    dagengewerkt = gew_dagen,
+    aanbrengbonus = NA_real_,
+    plaatsingsbonus = NA_real_,
+    inhoudingen = inhoudingen,
+    gratificatie = NA_real_,
+    inhouding_pensioen = NA_real_
+  )
+
 
 # Urenregistratie verwerking (billed_hours_cleaned) ------------------------
 # • Opschonen kolomnamen
