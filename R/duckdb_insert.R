@@ -76,5 +76,8 @@ dbReadTable(conn = con, "wrangle_data_meta")
 
 dbDisconnect(con)
 
+# Datakwaliteit validatie -------------------
+source(here::here("R", "data_validity.R"))
+
 # Rscript voor create tables in het schema -----------------
 # source(here::here("code", "duckdb_utils.R"))
