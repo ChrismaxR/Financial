@@ -1,6 +1,6 @@
 # Datakwaliteit validatie met {pointblank}
-# Draait na duckdb_insert.R — tabellen fin_wide, fin_long en bottom_line
-# worden gevalideerd en een HTML-rapport wordt opgeslagen.
+# Draait na duckdb_insert.R — tabellen fin_wide, fin_long, bottom_line en
+# maandelijkse_cat_long worden gevalideerd en een HTML-rapport wordt opgeslagen.
 
 library(pointblank)
 library(DBI)
@@ -17,6 +17,7 @@ con <- dbConnect(
 fin_wide <- dbReadTable(con, "fin_wide")
 fin_long <- dbReadTable(con, "fin_long")
 bottom_line <- dbReadTable(con, "bottom_line")
+maandelijkse_cat_long <- dbReadTable(con, "maandelijkse_cat_long")
 
 dbDisconnect(con)
 
@@ -129,9 +130,91 @@ agent_bottom_line <- create_agent(
   ) |>
   interrogate()
 
+# Agent: maandelijkse_cat_long ----------------------------------------------
+known_rekeningen <- c("Huis", "Chris", "Onbekend")
+known_richtingen <- c("Af", "Bij")
+known_categorieen <- c(
+  # ABN-categorieën
+  "Boodschappen",
+  "Zorgkosten",
+  "Creditcard",
+  "Huisrekening",
+  "Intern",
+  "Filantropie",
+  "Abonnement",
+  "Werk",
+  # Rabo-categorieën
+  "Afhalen & dineren",
+  "Kleding",
+  "Vaste kosten",
+  "Huisonderhoud",
+  "Contributie",
+  "Belastingen",
+  "Chris",
+  "Cel",
+  "Kinderbijslag",
+  # Gedeeld
+  "Overig"
+)
+
+agent_maandelijkse_cat_long <- create_agent(
+  tbl = maandelijkse_cat_long,
+  label = "maandelijkse_cat_long",
+  actions = al
+) |>
+  # Verplichte kolommen aanwezig
+  col_exists(
+    columns = c(
+      "rekening",
+      "rapportym",
+      "rapportdatum",
+      "categorie",
+      "richting",
+      "result"
+    )
+  ) |>
+  # Sleutelkolommen niet leeg
+  col_vals_not_null(columns = vars(rekening)) |>
+  col_vals_not_null(columns = vars(rapportym)) |>
+  col_vals_not_null(columns = vars(rapportdatum)) |>
+  col_vals_not_null(columns = vars(categorie)) |>
+  col_vals_not_null(columns = vars(richting)) |>
+  col_vals_not_null(columns = vars(result)) |>
+  # Datatypes
+  col_is_date(columns = vars(rapportdatum)) |>
+  col_is_numeric(columns = vars(result)) |>
+  # Gecontroleerde waardensets
+  col_vals_in_set(columns = vars(rekening), set = known_rekeningen) |>
+  col_vals_in_set(columns = vars(richting), set = known_richtingen) |>
+  col_vals_in_set(columns = vars(categorie), set = known_categorieen) |>
+  # rapportym moet overeenkomen met rapportdatum (format YYYYMM)
+  col_vals_expr(
+    expr = expr(rapportym == format(rapportdatum, "%Y%m"))
+  ) |>
+  # Geen dubbele combinaties van de groeperingssleutels
+  rows_distinct(columns = vars(rekening, rapportym, categorie, richting)) |>
+  interrogate()
+
 # Rapporten exporteren (één HTML per agent) ---------------------------------
-export_report(agent_fin_wide,    filename = here::here("sources", "financial_data", "dq_fin_wide.html"))
-export_report(agent_fin_long,    filename = here::here("sources", "financial_data", "dq_fin_long.html"))
-export_report(agent_bottom_line, filename = here::here("sources", "financial_data", "dq_bottom_line.html"))
+export_report(
+  agent_fin_wide,
+  filename = here::here("sources", "financial_data", "dq_fin_wide.html")
+)
+export_report(
+  agent_fin_long,
+  filename = here::here("sources", "financial_data", "dq_fin_long.html")
+)
+export_report(
+  agent_bottom_line,
+  filename = here::here("sources", "financial_data", "dq_bottom_line.html")
+)
+export_report(
+  agent_maandelijkse_cat_long,
+  filename = here::here(
+    "sources",
+    "financial_data",
+    "dq_maandelijkse_cat_long.html"
+  )
+)
 
 message("Data kwaliteitsrapporten opgeslagen in sources/financial_data/")

@@ -36,5 +36,5 @@ bind_rows(
       loonheffing = sum(loonheffing),
       vakantiebijslag = sum(vakantiebijslag + vakantiebijslagbonus),
       ouderschapsverlof = sum(ouderschapsverlof) * 0.9
-    )
+    ) 
 )

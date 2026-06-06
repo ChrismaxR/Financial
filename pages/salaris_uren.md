@@ -40,7 +40,7 @@ title:
   />
 </Grid>
 
-<Grid cols=2>
+
     <LineChart
         data={brutonetto}
         title='Bruto vs. netto salaris'
@@ -85,7 +85,6 @@ title:
             labelPosition="aboveStart"
         />
     </LineChart>
-</Grid>
 
     <BarChart
         data={fin_data_bonus}

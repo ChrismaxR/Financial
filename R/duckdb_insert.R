@@ -1,8 +1,10 @@
 # Bronbestanden en scripts laden ------------------
 # • Laadt het dataverwerkingsscript inkomsten.R
+# • Laadt het dataverwerkingsscript bankStatements.R
 # • Activeert DuckDB library (duckdb)
 
 source(here::here("R", "inkomsten.R"))
+source(here::here("R", "bankstatements.R"))
 library(duckdb)
 insert_time <- Sys.time() # tijd van het runnen van het script
 
@@ -61,6 +63,13 @@ dbWriteTable(
   append = T,
   overwrite = F
 )
+dbWriteTable(
+  con,
+  "maandelijkse_cat_long",
+  maandelijkse_cat_long,
+  append = F,
+  overwrite = T
+)
 
 # Data controleren --------------------------
 # • Manuele controle met dbReadTable om te verifiëren of data correct geladen is
@@ -70,6 +79,7 @@ dbReadTable(conn = con, "fin_wide")
 dbReadTable(conn = con, "bottom_line")
 dbReadTable(conn = con, "source_data_meta")
 dbReadTable(conn = con, "wrangle_data_meta")
+dbReadTable(conn = con, "maandelijkse_cat_long")
 
 # Databaseconnectie sluiten -------------------
 # • Sluit de verbinding met DuckDB na afronding werkzaamheden

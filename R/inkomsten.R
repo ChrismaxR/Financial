@@ -1,29 +1,21 @@
 library(tidyverse)
-source(here::here("R", "proj_variables.R")) # aparte file om persoonlijke data niet in github repo te zetten
+
 # Inlezen datasets -----------------------
 # • Financiële data (fin_data) uit financial.csv
 # • Urenregistratie (hours) uit meerdere CSV-bestanden (TimeChimp exports)
 
 # Manuele invoer van loonstrook cijfers uit Nmbrs ESS app.
-fin_data <- read_csv(fin_data_csv)
+fin_data <- read_csv(here::here("sources", "raw_data", "financial.csv"))
 
 # Vorige invoer loonstroken vorige werkgever
 legacy_fin_data <- read_delim(
-  here::here("sources", "raw_data", "statement_overview.csv"),
-  delim = ";",
-  trim_ws = TRUE,
-  na = "-",
-  locale = locale(
-    decimal_mark = ",",
-    grouping_mark = "."
-  )
-) |>
-  janitor::clean_names()
-
+  delim = ";", 
+  here::here("sources", "raw_data", "legacy_financial.csv"), 
+)
 
 # Export van uren opgegeven in TimeChimp
 hours <- map_df(
-  .x = fs::dir_ls(hours_data_csv, regex = "time_export"),
+  .x = fs::dir_ls(here::here("sources", "raw_data"), regex = "time_export"),
   .f = read_csv
 )
 
@@ -58,23 +50,19 @@ fin <- fin_data |>
 # Hiervoor moet ik mapping maken van oude structuur van de loonstrookdata naar de huidige
 # structuur (fin_data). Deze logica volgt hieronder:
 
-legacy_fin <- legacy_fin_data |>
+
+legacy_fin <- legacy_fin_data |> 
   transmute(
-    jaar = str_sub(as.character(tijdvak), 1, 4),
-    maand = str_sub(as.character(tijdvak), 5, 6),
-    ym = str_c(jaar, maand),
-    datum = ymd(str_c(jaar, maand, "01", sep = "-")),
-    gewerkte_ym = str_c(
-      year(datum - 1),
-      str_pad(month(datum - 1), width = 2, side = "left", pad = "0")
-    ),
-    gewerkte_datum = floor_date(datum - 1, unit = "month"),
-    stamsalaris = NA_real_,
-    salaris = tot_betaling,
+    jaar = str_sub(as.character(Tijdvak), 1, 4),
+    maand = str_sub(as.character(Tijdvak), 5, 6), 
+    ym = as.character(Tijdvak),
+    datum = lubridate::ymd(str_c(jaar, maand, "01")),
+    stamsalaris = salaris,
     loonheffing = loonhef,
+    salaris = salaris,
     ouderschapsverlof = NA_real_,
-    urenbonus = NA_real_,
-    tariefbonus = bonus_tb,
+    urenbonus = BonusTB,
+    tariefbonus = NA_real_,
     vakantiebijslag = vak_geld,
     vakantiebijslagbonus = NA_real_,
     leaseauto = NA_real_,
@@ -82,14 +70,13 @@ legacy_fin <- legacy_fin_data |>
     netto_salaris = nett,
     onkosten = NA_real_,
     mobiliteitsvergoeding = NA_real_,
-    dagengewerkt = gew_dagen,
+    dagengewerkt = gewdagen,
     aanbrengbonus = NA_real_,
     plaatsingsbonus = NA_real_,
-    inhoudingen = inhoudingen,
+    inhouding = ziekengeld,
     gratificatie = NA_real_,
     inhouding_pensioen = NA_real_
   )
-
 
 # Urenregistratie verwerking (billed_hours_cleaned) ------------------------
 # • Opschonen kolomnamen
@@ -104,7 +91,7 @@ billed_hours_cleaned <- hours |>
     datum = lubridate::dmy(datum),
     project = str_remove(
       project,
-      hours_project_regex
+      Sys.getenv("hours_project_regex")
     ),
     project = if_else(
       # 1 categorie maken van Onbetaald ouderschapsverlof
@@ -217,9 +204,10 @@ billed_hours <- billed_hours_cleaned |>
 # • Ontbrekende waardes vervangen door 0
 # • Kolommen hernoemen en opschonen met duidelijke namen
 
-fin_wide <- fin |>
-  tidylog::inner_join(billed_hours, by = c("ym" = "verloonde_ym")) |>
-  inner_join(monthly_project_hours, by = c("ym" = "verloonde_ym")) |>
+fin_wide <- bind_rows(fin, legacy_fin) |>
+  arrange(datum) |> 
+  tidylog::left_join(billed_hours, by = c("ym" = "verloonde_ym")) |>
+  tidylog::left_join(monthly_project_hours, by = c("ym" = "verloonde_ym")) |>
   mutate(
     across(
       .cols = c(

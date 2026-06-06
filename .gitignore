@@ -26,3 +26,4 @@ static/data
 *.xls
 *.xlsx
 R/proj_variables.R
+.Renviron

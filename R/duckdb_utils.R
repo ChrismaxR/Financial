@@ -126,5 +126,18 @@ dbExecute(
   )"
 )
 
+### maandelijkse_cat_long:
+dbExecute(
+  con,
+  "CREATE TABLE maandelijkse_cat_long (
+    rekening TEXT,
+    rapportym  TEXT,
+    rapportdatum DATE,
+    categorie TEXT,
+    richting TEXT,
+    result DOUBLE, 
+  )"
+)
+
 # Remove tables
-# duckdb::dbRemoveTable(con, "fin_wide")
+# duckdb::dbRemoveTable(con, "maandelijkse_cat_long")
