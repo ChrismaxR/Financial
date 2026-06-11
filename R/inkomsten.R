@@ -9,8 +9,8 @@ fin_data <- read_csv(here::here("sources", "raw_data", "financial.csv"))
 
 # Vorige invoer loonstroken vorige werkgever
 legacy_fin_data <- read_delim(
-  delim = ";", 
-  here::here("sources", "raw_data", "legacy_financial.csv"), 
+  delim = ";",
+  here::here("sources", "raw_data", "legacy_financial.csv"),
 )
 
 # Export van uren opgegeven in TimeChimp
@@ -50,11 +50,10 @@ fin <- fin_data |>
 # Hiervoor moet ik mapping maken van oude structuur van de loonstrookdata naar de huidige
 # structuur (fin_data). Deze logica volgt hieronder:
 
-
-legacy_fin <- legacy_fin_data |> 
+legacy_fin <- legacy_fin_data |>
   transmute(
     jaar = str_sub(as.character(Tijdvak), 1, 4),
-    maand = str_sub(as.character(Tijdvak), 5, 6), 
+    maand = str_sub(as.character(Tijdvak), 5, 6),
     ym = as.character(Tijdvak),
     datum = lubridate::ymd(str_c(jaar, maand, "01")),
     stamsalaris = salaris,
@@ -205,7 +204,7 @@ billed_hours <- billed_hours_cleaned |>
 # • Kolommen hernoemen en opschonen met duidelijke namen
 
 fin_wide <- bind_rows(fin, legacy_fin) |>
-  arrange(datum) |> 
+  arrange(datum) |>
   tidylog::left_join(billed_hours, by = c("ym" = "verloonde_ym")) |>
   tidylog::left_join(monthly_project_hours, by = c("ym" = "verloonde_ym")) |>
   mutate(

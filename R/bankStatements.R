@@ -4,17 +4,10 @@ library(tidyverse)
 ## Bankafschriften handmatig downloaden van de portalen van de banken
 
 ## ABN data --------------
-abn_data <- fs::dir_ls(
-  here::here("sources", "raw_data"),
-  regexp = ".TAB$"
-)
 
-rabo_data <- fs::dir_ls(
-  here::here("sources", "raw_data"),
-  regexp = Sys.getenv("rabo_csv")
-)
-
+### functie om abntransactiedata te importeren
 transactieDataReaderABN <- function(x) {
+  # handmatig kolomtitels ingevoerd, want brondata is zonder.
   abn_names <- c(
     "rekeningnummer",
     "muntsoort",
@@ -45,13 +38,17 @@ transactieDataReaderABN <- function(x) {
     setNames(abn_names)
 }
 
-
+### dataframe opzetten
 abn <- map_df(
-  .x = abn_data,
+  .x = fs::dir_ls(
+    here::here("sources", "raw_data"),
+    regexp = ".TAB$"
+  ),
   .f = transactieDataReaderABN
 )
 
 ## Rabo data --------------
+### functie om abntransactiedata te importeren
 transactieDataReaderRABO <- function(x) {
   read_csv(
     file = x,
@@ -84,10 +81,15 @@ transactieDataReaderRABO <- function(x) {
     )
 }
 
+### Rabo dataframe opzetten
 rabo <- map_df(
-  .x = rabo_data,
+  .x = fs::dir_ls(
+    here::here("sources", "raw_data"),
+    regexp = Sys.getenv("rabo_csv")
+  ),
   .f = transactieDataReaderRABO
 )
+
 
 # Wrangle -------------------
 
@@ -123,39 +125,52 @@ abn_wrangle <- abn |>
         str_extract(omschrijving, "(?<=/NAME/).+?(?=/)"),
       TRUE ~ "ABN AMRO"
     ),
+    tegenpartij_schoon = str_remove(str_to_lower(tegenpartij), "rijswijk"),
     categorie = case_when(
       str_detect(
-        str_to_lower(tegenpartij),
-        Sys.getenv("abn_boodschappen")
+        tegenpartij_schoon,
+        Sys.getenv("regex_boodschappen")
       ) ~ "Boodschappen",
       str_detect(
-        str_to_lower(tegenpartij),
-        Sys.getenv("abn_zorgkosten")
+        tegenpartij_schoon,
+        Sys.getenv("regex_zorgkosten")
       ) ~ "Zorgkosten",
       str_detect(
-        str_to_lower(tegenpartij),
-        Sys.getenv("abn_creditcard")
-      ) ~ "Creditcard",
+        tegenpartij_schoon,
+        Sys.getenv("regex_kleding")
+      ) ~ "Kleding",
       str_detect(
-        str_to_lower(tegenpartij),
-        Sys.getenv("abn_huisrekening")
+        tegenpartij_schoon,
+        Sys.getenv("regex_afhalen")
+      ) ~ "Afhalen & dineren",
+      str_detect(
+        tegenpartij_schoon,
+        Sys.getenv("regex_huisrekening")
       ) ~ "Huisrekening",
       str_detect(
-        str_to_lower(tegenpartij),
-        Sys.getenv("abn_intern")
+        tegenpartij_schoon,
+        Sys.getenv("regex_intern")
       ) ~ "Intern",
       str_detect(
-        str_to_lower(tegenpartij),
-        Sys.getenv("abn_filantropie")
-      ) ~ "Filantropie",
+        tegenpartij_schoon,
+        Sys.getenv("regex_filantropie")
+      ) ~ "Goede doelen",
       str_detect(
-        str_to_lower(tegenpartij),
-        Sys.getenv("abn_abonnement")
-      ) ~ "Abonnement",
+        tegenpartij_schoon,
+        Sys.getenv("regex_vaste_kosten")
+      ) ~ "Vaste kosten",
       str_detect(
-        str_to_lower(tegenpartij),
-        Sys.getenv("abn_werk")
+        tegenpartij_schoon,
+        Sys.getenv("regex_werk")
       ) ~ "Werk",
+      str_detect(
+        tegenpartij_schoon,
+        Sys.getenv("regex_overheid")
+      ) ~ "Overheid",
+      str_detect(
+        tegenpartij_schoon,
+        Sys.getenv("regex_contributie")
+      ) ~ "Contributie",
       TRUE ~ "Overig"
     )
   ) |>
@@ -176,38 +191,42 @@ rabo_wrangle <- rabo |>
       floor_date(transactiedatum, "month")
     ),
     rapportym = format(rapportdatum, "%Y%m"),
+    tegenpartij_schoon = str_remove(str_to_lower(tegenpartij), "rijswijk"),
     categorie = case_when(
       str_detect(
-        str_to_lower(tegenpartij),
-        Sys.getenv("rabo_boodschappen")
+        tegenpartij_schoon,
+        Sys.getenv("regex_boodschappen")
       ) ~ "Boodschappen", # Boodschappen — supermarkten, bakkers, kaas/vis/delicatessen
       str_detect(
-        str_to_lower(tegenpartij),
-        Sys.getenv("rabo_afhalen")
+        tegenpartij_schoon,
+        Sys.getenv("regex_afhalen")
       ) ~ "Afhalen & dineren", # Afhalen & dineren — restaurants, cafés, fastfood, bezorging, kantine
       str_detect(
-        str_to_lower(tegenpartij),
-        Sys.getenv("rabo_kleding")
+        tegenpartij_schoon,
+        Sys.getenv("regex_kleding")
       ) ~ "Kleding", # Kleding — kleding, schoenen, sportkleding
       str_detect(
-        str_to_lower(tegenpartij),
-        Sys.getenv("rabo_vaste_kosten")
+        tegenpartij_schoon,
+        Sys.getenv("regex_vaste_kosten")
       ) ~ "Vaste kosten", # Vaste kosten — nutsvoorzieningen, verzekeringen, bank
       str_detect(
-        str_to_lower(tegenpartij),
-        Sys.getenv("rabo_huisonderhoud")
+        tegenpartij_schoon,
+        Sys.getenv("regex_huisonderhoud")
       ) ~ "Huisonderhoud", # kosten in en om het huis
       str_detect(
-        str_to_lower(tegenpartij),
-        Sys.getenv("rabo_contributie")
+        tegenpartij_schoon,
+        Sys.getenv("regex_contributie")
       ) ~ "Contributie", # Contributie — verenigingen, goede doelen, kinderopvang, school
       str_detect(
-        str_to_lower(tegenpartij),
-        Sys.getenv("rabo_belastingen")
-      ) ~ "Belastingen", # Belastingen — gemeentelijke heffingen, enz
-      tegenpartij == Sys.getenv("rabo_ik") ~ "Chris",
-      tegenpartij == Sys.getenv("rabo_cel") ~ "Cel",
-      tegenpartij == Sys.getenv("rabo_kinderbijslag") ~ "Kinderbijslag",
+        tegenpartij_schoon,
+        Sys.getenv("regex_filantropie")
+      ) ~ "Goede doelen", # Contributie — verenigingen, goede doelen, kinderopvang, school
+      str_detect(
+        tegenpartij_schoon,
+        Sys.getenv("regex_overheid")
+      ) ~ "Overheid", # Belastingen — gemeentelijke heffingen, enz
+      tegenpartij_schoon == Sys.getenv("regex_chris") ~ "Chris",
+      tegenpartij_schoon == Sys.getenv("regex_cel") ~ "Cel",
       TRUE ~ "Overig"
     )
   )
@@ -234,6 +253,13 @@ maandelijkse_cat_long <- banktransacties |>
     result = sum(transactiebedrag, na.rm = T),
     .by = c(rekening, rapportym, rapportdatum, categorie, richting)
   )
+
+maandelijkse_tegenpartij_long <- banktransacties |>
+  summarise(
+    result = sum(transactiebedrag, na.rm = T),
+    .by = c(rekening, rapportym, rapportdatum, categorie, tegenpartij, richting)
+  )
+
 
 # Check -------------------
 
