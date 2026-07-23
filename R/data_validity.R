@@ -18,6 +18,7 @@ fin_wide <- dbReadTable(con, "fin_wide")
 fin_long <- dbReadTable(con, "fin_long")
 bottom_line <- dbReadTable(con, "bottom_line")
 maandelijkse_cat_long <- dbReadTable(con, "maandelijkse_cat_long")
+saldo_gaten <- dbReadTable(con, "saldo_gaten")
 
 dbDisconnect(con)
 
@@ -195,6 +196,22 @@ agent_maandelijkse_cat_long <- create_agent(
   rows_distinct(columns = vars(rekening, rapportym, categorie, richting)) |>
   interrogate()
 
+# Agent: saldo_gaten --------------------------------------------------------
+# saldo_gaten bevat enkel de transacties die de saldoketen onderbreken (zie
+# bankStatements.R) — normaal 0 rijen. Elke rij wijst op een mogelijk
+# ontbrekende banktransactie, dus de tabel hoort leeg te zijn. warn_at = 1:
+# één gat is al reden om de handmatige download te controleren.
+al_saldo <- action_levels(warn_at = 1)
+
+agent_saldo_gaten <- create_agent(
+  tbl = saldo_gaten,
+  label = "saldo_gaten (mogelijk ontbrekende banktransacties)",
+  actions = al_saldo
+) |>
+  # De tabel met saldogaten moet leeg zijn
+  row_count_match(count = 0) |>
+  interrogate()
+
 # Rapporten exporteren (één HTML per agent) ---------------------------------
 export_report(
   agent_fin_wide,
@@ -215,6 +232,10 @@ export_report(
     "financial_data",
     "dq_maandelijkse_cat_long.html"
   )
+)
+export_report(
+  agent_saldo_gaten,
+  filename = here::here("sources", "financial_data", "dq_saldo_gaten.html")
 )
 
 message("Data kwaliteitsrapporten opgeslagen in sources/financial_data/")

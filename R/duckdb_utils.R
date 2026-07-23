@@ -139,5 +139,16 @@ dbExecute(
   )"
 )
 
+### saldo_gaten:
+dbExecute(
+  con,
+  "CREATE TABLE saldo_gaten (
+    rekening TEXT,
+    transactiedatum  DATE,
+    transactiebedrag DOUBLE,
+    eindsaldo DOUBLE 
+  )"
+)
+
 # Remove tables
 # duckdb::dbRemoveTable(con, "maandelijkse_cat_long")

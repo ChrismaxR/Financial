@@ -253,7 +253,8 @@ fin_long <- fin_wide |>
       name == 'variabel_inkomen_perc' ~ "Bonus totaal",
       T ~ "No filter"
     )
-  )
+  ) |> 
+  tidylog::filter(!is.na(value))
 
 # Entrador Bottom line -----------------
 # aparte tabel maken om mijn bijdrage aan de bottom line van Entrador

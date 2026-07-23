@@ -7,7 +7,7 @@ title:
     data={jaar_selector}
     value=jaar
     multiple=true
-    defaultValue={['2025', '2026']}
+    selectAllByDefault=true
 />
 
 <Grid cols=3>

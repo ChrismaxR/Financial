@@ -70,6 +70,7 @@ dbWriteTable(
   append = F,
   overwrite = T
 )
+dbWriteTable(con, "saldo_gaten", saldo_gaten, append = F, overwrite = T)
 
 # Data controleren --------------------------
 # • Manuele controle met dbReadTable om te verifiëren of data correct geladen is
@@ -80,6 +81,7 @@ dbReadTable(conn = con, "bottom_line")
 dbReadTable(conn = con, "source_data_meta")
 dbReadTable(conn = con, "wrangle_data_meta")
 dbReadTable(conn = con, "maandelijkse_cat_long")
+dbReadTable(conn = con, "saldo_gaten")
 
 # Databaseconnectie sluiten -------------------
 # • Sluit de verbinding met DuckDB na afronding werkzaamheden

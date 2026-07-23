@@ -240,7 +240,39 @@ banktransacties <- bind_rows(abn_wrangle, rabo_wrangle) |>
       str_detect(rekeningnummer, Sys.getenv("persoonlijkereknr")) ~ "Chris",
       TRUE ~ "Onbekend"
     )
-  )
+  ) |>
+  # Geen primaire sleutel beschikbaar: dedupliceer op alle kolommen tegelijk,
+  # zodat van elke volledig identieke rij er maar één overblijft.
+  tidylog::distinct()
+
+# Saldo-continuïteitscontrole -------------------
+# Bankdata wordt handmatig per periode gedownload; daardoor kan er ongemerkt
+# een periode ontbreken. Transacties zijn onregelmatig, dus de tijd zegt niets
+# over of er data mist. Het lopende saldo (eindsaldo) vormt echter een keten:
+# het eindsaldo ná een transactie mín het transactiebedrag is het saldo vóór
+# die transactie, en dat "impliciete beginsaldo" hoort exact het eindsaldo van
+# een andere transactie op dezelfde rekening te zijn. Sluit het nergens op aan,
+# dan ontbreekt er waarschijnlijk een transactie (een gat in de download).
+# Deze set-gebaseerde controle is volgorde-onafhankelijk en werkt daarom ook
+# bij meerdere transacties op dezelfde dag.
+saldo_gaten <- banktransacties |>
+  filter(!is.na(eindsaldo)) |>
+  # in hele centen, om floating-point-vergelijkingen te vermijden
+  mutate(
+    eindsaldo_cent = round(eindsaldo * 100),
+    beginsaldo_impliciet_cent = round((eindsaldo - transactiebedrag) * 100)
+  ) |>
+  mutate(
+    keten_sluit_aan = beginsaldo_impliciet_cent %in% eindsaldo_cent,
+    # de oudste transactie per rekening heeft geen voorganger in de dataset
+    is_oudste_transactie = transactiedatum == min(transactiedatum),
+    .by = rekeningnummer
+  ) |>
+  # houd enkel de rijen over die de saldoketen onderbreken (normaal: 0 rijen);
+  # de volledige transactiedetails staan al elders, hier alleen wat nodig is
+  # om een eventueel gat terug te vinden.
+  filter(!keten_sluit_aan & !is_oudste_transactie) |>
+  select(rekening, transactiedatum, transactiebedrag, eindsaldo)
 
 # Aggregate -------------------
 

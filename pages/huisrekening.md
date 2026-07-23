@@ -7,7 +7,7 @@ title:
     data={jaar_selector}
     value=jaar
     multiple=true
-    defaultValue={['2025', '2026']}
+    selectAllByDefault=true
 />
 
 <Grid cols=3>
@@ -78,7 +78,9 @@ title:
   labels=true
 />
 
-
+<DataTable data={maandelijks_inkomsten} search=true sortable=true/>
+<DataTable data={maandelijks_uitgaven} search=true sortable=true/>
+<DataTable data={resultaat} search=true sortable=true/>
 
 ```sql jaar_selector
   select distinct extract(year from rapportdatum) jaar

@@ -78,7 +78,8 @@ where jaar in ${inputs.geselecteerd_jaar.value}
 ```sql total_bruto
 select sum(value) as bruto_bedrag 
 from ${fin_long_year}
-where name in (
+where datum >= '2022-01-01' -- alleen bruto verdiend bij Entrador, niet eerder v
+  and name in (
     'salaris', 'urenbonus', 'tariefbonus', 'vakantiebijslagbonus', 'vakantiebijslag',
     'onkosten', 'mobiliteitsvergoeding',  'plaatsingsbonus', 'aanbrengbonus'
 )
