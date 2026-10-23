@@ -9,6 +9,7 @@ static/data
 .env
 .evidence/meta
 /sources
+/analyse
 .evidence/customization/.profile.json
 .Rhistory
 .RData

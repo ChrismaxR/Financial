@@ -45,7 +45,8 @@ abn <- map_df(
     regexp = ".TAB$"
   ),
   .f = transactieDataReaderABN
-)
+) |> 
+  tidylog::distinct()
 
 ## Rabo data --------------
 ### functie om abntransactiedata te importeren
@@ -88,7 +89,8 @@ rabo <- map_df(
     regexp = Sys.getenv("rabo_csv")
   ),
   .f = transactieDataReaderRABO
-)
+) |> 
+  tidylog::distinct()
 
 
 # Wrangle -------------------
