@@ -271,10 +271,10 @@ bottom_line <- billed_hours_cleaned |>
     eind_klant = str_remove(project, "Inzet "),
     uren,
     uurtarief = case_when(
-      eind_klant == "KLM" ~ Sys.getenv("KLM_uurtarief"),
-      eind_klant == "RVIG" ~ Sys.getenv("RVIG_uurtarief"),
-      eind_klant == "RVIG verl" ~ Sys.getenv("RVIG_verl_uurtarief"),
-      eind_klant == "DT&V" ~ Sys.getenv("DTV_uurtarief"),
+      eind_klant == "KLM"       ~ as.numeric(Sys.getenv("KLM_uurtarief")),
+      eind_klant == "RVIG"      ~ as.numeric(Sys.getenv("RVIG_uurtarief")),
+      eind_klant == "RVIG verl" ~ as.numeric(Sys.getenv("RVIG_verl_uurtarief")),
+      eind_klant == "DT&V"      ~ as.numeric(Sys.getenv("DTV_uurtarief")),
     ),
     factuurbedrag = uren * as.numeric(uurtarief)
   )

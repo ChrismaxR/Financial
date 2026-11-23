@@ -151,4 +151,4 @@ dbExecute(
 )
 
 # Remove tables
-# duckdb::dbRemoveTable(con, "maandelijkse_cat_long")
+# duckdb::dbRemoveTable(con, "bottom_line")
